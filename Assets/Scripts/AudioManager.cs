@@ -10,6 +10,9 @@ public class AudioManager : MonoBehaviour
     public List<AudioClip> audioClips;     // List of AudioClips for skipping
     public Slider volumeSlider;           // Slider for volume control
     public Slider pitchSlider;            // Slider for pitch control
+    public Slider progressSlider;         // Slider for showing/controlling song progress
+    public TextMeshProUGUI elapsedTimeText; // Text for elapsed time
+    public TextMeshProUGUI totalTimeText;   // Text for total duration
     public GameObject clipButtonPrefab;   // Prefab for the UI button
     public Transform clipListParent;      // Parent object for the clip buttons
 
@@ -26,6 +29,14 @@ public class AudioManager : MonoBehaviour
 
         // Populate the UI list with buttons for each audio clip
         PopulateClipList();
+
+        // Set up progress slider
+        if (progressSlider != null)
+        {
+            progressSlider.minValue = 0;
+            progressSlider.maxValue = 1;
+            progressSlider.value = 0;
+        }
     }
 
     void Update()
@@ -41,6 +52,12 @@ public class AudioManager : MonoBehaviour
         if (isPlaying && !audioSources[0].isPlaying) // Check the first audio source
         {
             SkipToNext();
+        }
+
+        // Update progress slider and time texts if playing
+        if (isPlaying)
+        {
+            UpdateProgress();
         }
     }
 
@@ -70,6 +87,9 @@ public class AudioManager : MonoBehaviour
             }
         }
         isPlaying = true;
+
+        // Set total duration text
+        UpdateTotalTime();
     }
 
     public void PauseMusic()
@@ -114,6 +134,15 @@ public class AudioManager : MonoBehaviour
             source.Play();
         }
         isPlaying = true;
+
+        // Reset progress slider
+        if (progressSlider != null)
+        {
+            progressSlider.value = 0;
+        }
+
+        // Update total time text
+        UpdateTotalTime();
     }
 
     private void PopulateClipList()
@@ -159,5 +188,47 @@ public class AudioManager : MonoBehaviour
             // Add click listener to the button
             button.GetComponent<Button>().onClick.AddListener(() => PlayClipFromUI(clipIndex));
         }
+    }
+
+    private void UpdateProgress()
+    {
+        if (audioSources[0].clip != null)
+        {
+            // Update slider value based on the current playback time
+            progressSlider.value = audioSources[0].time / audioSources[0].clip.length;
+
+            // Update elapsed time text
+            elapsedTimeText.text = FormatTime(audioSources[0].time);
+        }
+    }
+
+    public void OnProgressSliderChanged()
+    {
+        if (audioSources[0].clip != null)
+        {
+            // Set playback time based on slider value
+            audioSources[0].time = progressSlider.value * audioSources[0].clip.length;
+
+            // Sync all audio sources
+            foreach (AudioSource source in audioSources)
+            {
+                source.time = audioSources[0].time;
+            }
+        }
+    }
+
+    private void UpdateTotalTime()
+    {
+        if (audioSources[0].clip != null)
+        {
+            totalTimeText.text = FormatTime(audioSources[0].clip.length);
+        }
+    }
+
+    private string FormatTime(float time)
+    {
+        int minutes = Mathf.FloorToInt(time / 60f);
+        int seconds = Mathf.FloorToInt(time % 60f);
+        return string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 }
