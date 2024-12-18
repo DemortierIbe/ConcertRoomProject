@@ -3,37 +3,27 @@ using UnityEngine;
 public class PlayerBodySpawner : MonoBehaviour
 {
     public Transform playerCamera;       // Reference to the player's camera (headset)
-    public GameObject playerBodyPrefab;  // The player body prefab (e.g., spheres, capsules, etc.)
-    private GameObject playerBodyInstance; // Instance of the player body
+    public GameObject playerBodyInstance; // Reference to the player body already in the scene
 
     public float bodyHeightOffset = 1.75f; // Height from the ground to the head (adjust based on your prefab)
 
     void Start()
     {
+        // Ensure required references are assigned
         if (playerCamera == null)
         {
             Debug.LogError("Player Camera is not assigned.");
             return;
         }
 
-        if (playerBodyPrefab != null)
+        if (playerBodyInstance == null)
         {
-            // Spawn the body at the correct position
-            Vector3 spawnPosition = new Vector3(
-                playerCamera.position.x,
-                playerCamera.position.y - bodyHeightOffset, // Lower the body to align feet with the ground
-                playerCamera.position.z
-            );
-
-            // Instantiate the body at the corrected position
-            playerBodyInstance = Instantiate(playerBodyPrefab, spawnPosition, Quaternion.identity);
-
-            Debug.Log("Player body spawned at " + spawnPosition);
+            Debug.LogError("Player Body Instance is not assigned.");
+            return;
         }
-        else
-        {
-            Debug.LogError("Player Body Prefab is not assigned.");
-        }
+
+        // Optionally adjust the initial position of the body to align with the camera
+        AlignBodyWithCamera();
     }
 
     void Update()
@@ -52,5 +42,23 @@ public class PlayerBodySpawner : MonoBehaviour
             bodyRotation.z = 0f;
             playerBodyInstance.transform.rotation = Quaternion.Euler(bodyRotation);
         }
+    }
+
+    private void AlignBodyWithCamera()
+    {
+        // Adjust the body position based on the camera's position and height offset
+        Vector3 initialPosition = playerCamera.position;
+        initialPosition.y -= bodyHeightOffset;
+
+        playerBodyInstance.transform.position = initialPosition;
+
+        // Align rotation to the camera's Y-axis rotation
+        Vector3 initialRotation = playerCamera.rotation.eulerAngles;
+        initialRotation.x = 0f;
+        initialRotation.z = 0f;
+
+        playerBodyInstance.transform.rotation = Quaternion.Euler(initialRotation);
+
+        Debug.Log("Player body aligned with the camera at start.");
     }
 }
