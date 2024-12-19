@@ -2,35 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // Required for TextMeshPro support
+using TMPro;
 
 public class AudioManager : MonoBehaviour
 {
-    public List<AudioSource> audioSources; // List of AudioSources
-    public List<AudioClip> audioClips;     // List of AudioClips for skipping
-    public Slider volumeSlider;           // Slider for volume control
-    public Slider pitchSlider;            // Slider for pitch control
-    public Slider progressSlider;         // Slider for showing/controlling song progress
-    public TextMeshProUGUI elapsedTimeText; // Text for elapsed time
-    public TextMeshProUGUI totalTimeText;   // Text for total duration
-    public GameObject clipButtonPrefab;   // Prefab for the UI button
-    public Transform clipListParent;      // Parent object for the clip buttons
+    public List<AudioSource> audioSources; // List AudioSources
+    public List<AudioClip> audioClips;     // List AudioClips
+    public Slider volumeSlider;           
+    public Slider pitchSlider;            
+    public Slider progressSlider;         
+    public TextMeshProUGUI elapsedTimeText; 
+    public TextMeshProUGUI totalTimeText;   
+    public GameObject clipButtonPrefab;   //button voor list songs
+    public Transform clipListParent;      
 
-    private int currentClipIndex = 0;     // Index of the current AudioClip
-    private bool isPlaying = false;       // Track the play/pause state
+    private int currentClipIndex = 0;     
+    private bool isPlaying = false;       
 
     void Start()
     {
-        // Ensure all AudioSources are paused and no music starts automatically
         foreach (AudioSource source in audioSources)
         {
-            source.Stop();
+            source.Stop();      //pause all songs
         }
 
-        // Populate the UI list with buttons for each audio clip
         PopulateClipList();
 
-        // Set up progress slider
         if (progressSlider != null)
         {
             progressSlider.minValue = 0;
@@ -41,20 +38,18 @@ public class AudioManager : MonoBehaviour
 
     void Update()
     {
-        // Update volume and pitch values for all AudioSources
         foreach (AudioSource source in audioSources)
         {
             source.volume = volumeSlider.value;
             source.pitch = pitchSlider.value;
         }
 
-        // Automatically move to the next track if the current one has finished
-        if (isPlaying && !audioSources[0].isPlaying) // Check the first audio source
+        if (isPlaying && !audioSources[0].isPlaying) // kijken of de audio nog speelt
         {
             SkipToNext();
         }
 
-        // Update progress slider and time texts if playing
+        
         if (isPlaying)
         {
             UpdateProgress();
@@ -77,7 +72,7 @@ public class AudioManager : MonoBehaviour
     {
         if (audioClips.Count == 0) return;
 
-        // Play the current clip on all audio sources
+        
         foreach (AudioSource source in audioSources)
         {
             if (!source.isPlaying)
@@ -88,7 +83,7 @@ public class AudioManager : MonoBehaviour
         }
         isPlaying = true;
 
-        // Set total duration text
+        
         UpdateTotalTime();
     }
 
@@ -105,8 +100,8 @@ public class AudioManager : MonoBehaviour
     {
         if (audioClips.Count == 0) return;
 
-        // Increment the clip index and loop back to the start if at the end
-        currentClipIndex = (currentClipIndex + 1) % audioClips.Count;
+        
+        currentClipIndex = (currentClipIndex + 1) % audioClips.Count;   //index++ als einde van de list terug naar begin
         PlayClip(currentClipIndex);
     }
 
@@ -114,8 +109,8 @@ public class AudioManager : MonoBehaviour
     {
         if (audioClips.Count == 0) return;
 
-        // Decrement the clip index and loop to the end if at the beginning
-        currentClipIndex = (currentClipIndex - 1 + audioClips.Count) % audioClips.Count;
+        
+        currentClipIndex = (currentClipIndex - 1 + audioClips.Count) % audioClips.Count;        //index++ begin list naar einde van list
         PlayClip(currentClipIndex);
     }
 
@@ -125,23 +120,23 @@ public class AudioManager : MonoBehaviour
         PlayClip(currentClipIndex);
     }
 
-    private void PlayClip(int index)
+    private void PlayClip(int index)    //om te wisselen van liedje vorig stoppen en nieuw starten
     {
         foreach (AudioSource source in audioSources)
         {
-            source.Stop(); // Stop any currently playing audio
+            source.Stop(); 
             source.clip = audioClips[index];
             source.Play();
         }
         isPlaying = true;
 
-        // Reset progress slider
+        
         if (progressSlider != null)
         {
             progressSlider.value = 0;
         }
 
-        // Update total time text
+        
         UpdateTotalTime();
     }
 
@@ -153,28 +148,28 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        // Clear existing buttons if necessary
+        
         foreach (Transform child in clipListParent)
         {
             Destroy(child.gameObject);
         }
 
-        // Create a button for each audio clip
+        
         for (int i = 0; i < audioClips.Count; i++)
         {
-            int clipIndex = i; // Local copy for the button callback
+            int clipIndex = i; 
             GameObject button = Instantiate(clipButtonPrefab, clipListParent);
 
-            // Reset the button's RectTransform for proper layout
+            
             RectTransform buttonRect = button.GetComponent<RectTransform>();
             if (buttonRect != null)
             {
-                buttonRect.localScale = Vector3.one; // Reset scale
-                buttonRect.anchoredPosition3D = Vector3.zero; // Reset position
-                buttonRect.localPosition = Vector3.zero; // Ensure localPosition is correct
+                buttonRect.localScale = Vector3.one; 
+                buttonRect.anchoredPosition3D = Vector3.zero; 
+                buttonRect.localPosition = Vector3.zero; 
             }
 
-            // Set the button text
+            
             TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
             if (buttonText != null)
             {
@@ -185,7 +180,7 @@ public class AudioManager : MonoBehaviour
                 Debug.LogError("Button prefab is missing a TextMeshProUGUI component.");
             }
 
-            // Add click listener to the button
+            
             button.GetComponent<Button>().onClick.AddListener(() => PlayClipFromUI(clipIndex));
         }
     }
@@ -194,10 +189,10 @@ public class AudioManager : MonoBehaviour
     {
         if (audioSources[0].clip != null)
         {
-            // Update slider value based on the current playback time
-            progressSlider.value = audioSources[0].time / audioSources[0].clip.length;
+            
+            progressSlider.value = audioSources[0].time / audioSources[0].clip.length;// slider value naar huide tijd
 
-            // Update elapsed time text
+            
             elapsedTimeText.text = FormatTime(audioSources[0].time);
         }
     }
@@ -206,10 +201,10 @@ public class AudioManager : MonoBehaviour
     {
         if (audioSources[0].clip != null)
         {
-            // Set playback time based on slider value
-            audioSources[0].time = progressSlider.value * audioSources[0].clip.length;
+            
+            audioSources[0].time = progressSlider.value * audioSources[0].clip.length;  //tijd lied aanpassen op basis sldier
 
-            // Sync all audio sources
+            
             foreach (AudioSource source in audioSources)
             {
                 source.time = audioSources[0].time;
@@ -221,7 +216,7 @@ public class AudioManager : MonoBehaviour
     {
         if (audioSources[0].clip != null)
         {
-            totalTimeText.text = FormatTime(audioSources[0].clip.length);
+            totalTimeText.text = FormatTime(audioSources[0].clip.length);   //totale tijd lied nemen
         }
     }
 

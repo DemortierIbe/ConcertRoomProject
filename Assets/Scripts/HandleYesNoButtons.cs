@@ -3,16 +3,16 @@ using UnityEngine.UI;
 
 public class HandleYesNoButtons : MonoBehaviour
 {
-    public GameObject currentCanvas; // The canvas with the Yes and No buttons
-    public GameObject yesCanvas;     // The canvas to show when Yes is clicked
-    public GameObject noCanvas;      // The canvas to show when No is clicked
+    public GameObject currentCanvas; 
+    public GameObject yesCanvas;     
+    public GameObject noCanvas;      
 
-    public Button yesButton;         // Reference to the Yes button
-    public Button noButton;          // Reference to the No button
+    public Button yesButton;         
+    public Button noButton;          
 
     private void Start()
     {
-        // Ensure buttons are properly assigned and add listeners
+        
         if (yesButton != null)
         {
             yesButton.onClick.AddListener(OnYesClicked);
@@ -26,7 +26,7 @@ public class HandleYesNoButtons : MonoBehaviour
 
     private void OnYesClicked()
     {
-        // Hide the current canvas and show the Yes canvas
+        
         if (currentCanvas != null)
         {
             currentCanvas.SetActive(false);
@@ -40,7 +40,7 @@ public class HandleYesNoButtons : MonoBehaviour
 
     private void OnNoClicked()
     {
-        // Hide the current canvas and show the No canvas
+        
         if (currentCanvas != null)
         {
             currentCanvas.SetActive(false);
